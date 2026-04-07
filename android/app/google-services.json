@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1040765054234",
+    "project_id": "harmonia-daccb",
+    "storage_bucket": "harmonia-daccb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040765054234:android:1914f465a917c5bcccd0a3",
+        "android_client_info": {
+          "package_name": "com.ai.harmonia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1040765054234-55m427j7ad5spmo5ipk3c2t0pqv57t9m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9qgk4fSmbk5DOWwF7gDMgK66h6mb-wDw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1040765054234-55m427j7ad5spmo5ipk3c2t0pqv57t9m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
