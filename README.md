@@ -1,457 +1,234 @@
-# Harmonia AI
+<div align="center">
 
-Harmonia AI is a Flutter wellness app that combines real-time computer vision, Firebase, and on-device machine learning to support exercise tracking, yoga pose analysis, posture scoring, study focus, and personalized AI coaching.
+# 🧘 Harmonia AI
 
-This repository contains both the mobile app and the ML training pipelines used to generate the models shipped with the app.
+**A Flutter wellness app powered by real-time computer vision, on-device ML, and generative AI coaching**
 
-## What The App Does
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore%20%7C%20Functions-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
+[![TensorFlow Lite](https://img.shields.io/badge/TensorFlow%20Lite-On--Device%20ML-FF6F00?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/lite)
+[![MediaPipe](https://img.shields.io/badge/MediaPipe-Pose%20Landmarker-00A98F)](https://developers.google.com/mediapipe)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](#license)
 
-Harmonia AI has four core user-facing modes:
+</div>
 
-1. Exercise Mode
-2. Yoga Mode
-3. Study Focus Mode
-4. AI Assistant
+---
 
-The app uses Firebase for authentication, Firestore for user/session storage, and Cloud Functions / Firebase AI for AI responses. The computer vision modules use MediaPipe Pose and TensorFlow Lite models generated from the training pipelines in this repo.
+Harmonia AI turns your phone's camera into a real-time fitness and posture coach. It tracks exercise reps, scores yoga poses, monitors study-session focus, and answers questions through a Gemini-powered assistant — all backed by on-device ML models so the core experience stays fast and private.
 
-## Quick Start
+This repo contains **both** the Flutter mobile app and the Python ML pipelines used to train the models it ships with.
 
-If you only want to run the app:
+<p align="center">
+  <img src="docs/screenshots/hero.png" alt="Harmonia AI app screens" width="800">
+  <br>
+  <sub><i>Add your own screenshots/GIFs here — a 3–4 image row of Exercise, Yoga, Focus, and Assistant modes converts browsers into stars ⭐</i></sub>
+</p>
+
+---
+
+## ✨ Core Modes
+
+| Mode | What it does |
+|---|---|
+| 🏋️ **Exercise** | Live rep counting and posture-quality scoring from camera pose landmarks |
+| 🧘 **Yoga** | Pose classification with accuracy, hold-time, and stability feedback |
+| 📚 **Study Focus** | Tracks focus percentage, distraction events, and pomodoros completed |
+| 🤖 **AI Assistant** | Gemini-powered coach with context from your last 7 days of sessions |
+
+## 🏗 Architecture
+
+```
+Flutter UI
+  │
+  ├─► Firebase Auth ─────────► User identity
+  ├─► Firestore ──────────────► Sessions · chat history · profile
+  ├─► Cloud Functions ────────► AI responses · stats aggregation
+  ├─► Firebase AI (fallback) ─► Direct Gemini access
+  └─► On-device TFLite models ─► Exercise / Posture / Yoga inference
+```
+
+**Pipeline:** camera frame → MediaPipe pose extraction → landmark normalization → on-device model inference → live UI feedback (counters, scores, cues).
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Mobile app | Flutter (Dart) |
+| Computer vision | MediaPipe Pose Landmarker |
+| On-device inference | TensorFlow Lite |
+| Model training | Python, TensorFlow/Keras, scikit-learn |
+| Auth & database | Firebase Auth, Firestore |
+| Backend logic | Firebase Cloud Functions (TypeScript) |
+| Generative AI | Gemini (via Cloud Functions, with Firebase AI Logic fallback) |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Flutter SDK (stable channel)
+- A configured Firebase project connected to this app (`google-services.json`, `.firebaserc`, etc.)
+- Python 3.10+ if you want to run or retrain the ML pipelines
+
+### Run the app
 
 ```powershell
 flutter pub get
 flutter run
 ```
 
-If you want to verify code quality:
+### Verify code quality
 
 ```powershell
 flutter analyze
 ```
 
-If you want to build a debug APK:
+### Build a debug APK
 
 ```powershell
 flutter build apk --debug
 ```
 
-## Important Project Files
+> **Firebase setup:** this project expects Firebase integration files (`google-services.json`, `firestore.rules`, `storage.rules`, `firebase.json`) to already be present and pointed at your own Firebase project before running.
 
-- [lib/main.dart](lib/main.dart) - app entry point and Firebase initialization
-- [lib/app.dart](lib/app.dart) - root MaterialApp and router setup
-- [lib/features/assistant/services/ai_service.dart](lib/features/assistant/services/ai_service.dart) - AI chat service
-- [functions/src/getAIResponse.ts](functions/src/getAIResponse.ts) - Cloud Function for Gemini replies
-- [functions/src/saveSession.ts](functions/src/saveSession.ts) - saves exercise/yoga/focus sessions
-- [functions/src/getUserStats.ts](functions/src/getUserStats.ts) - aggregates user metrics
-- [pipelines/exercise_pipeline.py](pipelines/exercise_pipeline.py) - exercise landmark classifier training
-- [pipelines/posture_pipeline.py](pipelines/posture_pipeline.py) - posture classifier training
-- [yoga_pipeline.py](yoga_pipeline.py) - yoga classifier training and export
+---
 
-## Repository Layout
+## 📁 Repository Layout
 
 ```text
 HARMONIA.ai/
-  lib/                    Flutter app source
-  functions/              Firebase Cloud Functions (TypeScript)
-  pipelines/              ML preprocessing and training scripts
-  assets/models/          Exported TFLite models and labels
-  .context/               Local datasets and downloaded pose assets
-  android/                Android host project
+├── lib/                 # Flutter app source
+│   ├── main.dart         # Entry point + Firebase init
+│   ├── app.dart           # Root MaterialApp + router
+│   └── features/assistant/services/ai_service.dart
+├── functions/            # Firebase Cloud Functions (TypeScript)
+│   ├── getAIResponse.ts   # Gemini chat replies
+│   ├── saveSession.ts     # Persists exercise/yoga/focus sessions
+│   └── getUserStats.ts    # Aggregates user metrics
+├── pipelines/             # ML preprocessing + training scripts
+│   ├── exercise_pipeline.py
+│   └── posture_pipeline.py
+├── yoga_pipeline.py       # Yoga classifier training + export
+├── assets/models/         # Exported TFLite models + labels
+├── .context/               # Local datasets and downloaded pose assets
+└── android/                # Android host project
 ```
 
-## Architecture Overview
+---
 
-```text
-Flutter UI
-  -> Firebase Auth
-  -> Firestore sessions / chat history / user profile
-  -> Cloud Functions for AI responses and stats
-  -> Firebase AI fallback for direct Gemini access
-  -> On-device ML models for exercise / posture / yoga
-```
+## 🗄 Data Model
 
-The app is split into these major layers:
+<details>
+<summary><b>users/{uid}</b></summary>
 
-1. Camera and pose extraction
-2. Landmark normalization
-3. Exercise / yoga / posture analysis
-4. Session persistence
-5. AI response generation
+| Field | Type |
+|---|---|
+| `displayName` | string |
+| `email` | string |
+| `createdAt` | timestamp |
+| `streakDays` | number |
+| `totalSessions` | number |
 
-## Data Model
+</details>
 
-### users/{uid}
+<details>
+<summary><b>sessions/{sessionId}</b></summary>
 
-Stored profile fields:
+| Field | Type |
+|---|---|
+| `uid` | string |
+| `type` | `exercise` \| `yoga` \| `focus` |
+| `startedAt` / `endedAt` | timestamp |
+| `durationSeconds` | number |
+| `metrics` | object *(shape depends on `type`, see below)* |
 
-- displayName: string
-- email: string
-- createdAt: timestamp
-- streakDays: number
-- totalSessions: number
+**Exercise metrics:** `exercise`, `reps`, `sets`, `avgAngle`, `postureScore`
+**Yoga metrics:** `pose`, `holdDurationSec`, `stabilityScore`, `accuracyScore`
+**Focus metrics:** `focusPercent`, `distractionEvents`, `pomodorosCompleted`
 
-### sessions/{sessionId}
+</details>
 
-Stored session fields:
+<details>
+<summary><b>chatHistory/{uid}/messages/{msgId}</b></summary>
 
-- uid: string
-- type: exercise | yoga | focus
-- startedAt: timestamp
-- endedAt: timestamp
-- durationSeconds: number
-- metrics: object
+| Field | Type |
+|---|---|
+| `role` | `user` \| `assistant` |
+| `content` | string |
+| `timestamp` | timestamp |
 
-Exercise session metrics example:
+</details>
 
-- exercise
-- reps
-- sets
-- avgAngle
-- postureScore
+---
 
-Yoga session metrics example:
+## 🤖 AI Assistant
 
-- pose
-- holdDurationSec
-- stabilityScore
-- accuracyScore
+The assistant runs through two paths, so chat stays available even if one transport fails:
 
-Focus session metrics example:
+1. **Callable Cloud Function** — primary path, includes server-side Firestore context
+2. **Firebase AI Logic fallback** — direct Gemini access if the callable path is unavailable
 
-- focusPercent
-- distractionEvents
-- pomodorosCompleted
+For weekly-routine questions ("how'd my week look?"), the assistant automatically pulls the user's profile and the last 7 days of session documents from Firestore before responding.
 
-### chatHistory/{uid}/messages/{msgId}
+---
 
-Stored chat fields:
+## 🧠 ML Training Pipelines
 
-- role: user | assistant
-- content: string
-- timestamp: timestamp
+Three independent pipelines produce the models shipped in `assets/models/`. Each is a plain Python script structured like a notebook — see [Notebook Workflow](#notebook-workflow) below if you'd rather work in cells.
 
-## Firebase Setup
+### 1. Exercise Pipeline
+**Goal:** classify exercises from MediaPipe pose landmarks.
 
-This project already includes Firebase integration artifacts such as:
-
-- google-services.json
-- .firebaserc
-- firestore.rules
-- storage.rules
-- firebase.json
-
-To run the app with Firebase, your project must be configured and connected to the correct Firebase project.
-
-## AI Assistant Flow
-
-The AI assistant supports two paths:
-
-1. Callable Cloud Functions path for chat and server-side context
-2. Firebase AI Logic fallback path when callable transport is unavailable
-
-It also detects weekly-routine style questions and adds Firestore context from the user profile and the last 7 days of sessions.
-
-## ML Training Overview
-
-The repository contains training code for three ML pipelines:
-
-1. Exercise pipeline
-2. Posture pipeline
-3. Yoga pipeline
-
-These scripts are written as plain Python pipelines, but they follow the same steps you would normally place in a Jupyter notebook:
-
-- environment setup
-- dataset inspection
-- preprocessing
-- feature extraction
-- model training
-- validation/testing
-- export to TFLite
-- app integration
-
-If you want a notebook version, the same stages can be split into cells in VS Code or Jupyter. The repo currently uses Python scripts rather than checked-in `.ipynb` notebooks.
-
-## Notebook Workflow In Detail
-
-Even though the repo does not currently include notebook files, the training flow is notebook-friendly.
-
-### Recommended notebook cell order
-
-Cell 1: imports and environment setup
-
-- import numpy, pandas, cv2, mediapipe, tensorflow, sklearn
-- define data directories
-- define model output paths
-
-Cell 2: dataset exploration
-
-- count classes
-- show sample images
-- inspect label files
-- verify directory structure
-
-Cell 3: preprocessing
-
-- run MediaPipe pose detection
-- normalize landmarks
-- skeletonize images where needed
-- create train/validation/test splits
-
-Cell 4: feature engineering
-
-- convert landmarks to normalized numeric vectors
-- derive posture features from geometry
-- build class labels
-
-Cell 5: model definition
-
-- define Keras model architecture
-- choose dense or CNN layers depending on pipeline
-- compile with Adam and sparse categorical cross entropy
-
-Cell 6: training
-
-- fit the model
-- monitor validation accuracy and loss
-- use EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-
-Cell 7: evaluation
-
-- evaluate on validation or test split
-- generate confusion matrix
-- plot training curves
-
-Cell 8: export
-
-- save best Keras model
-- convert to TFLite
-- write labels file
-
-Cell 9: inference testing
-
-- run a single image through preprocessing
-- verify prediction output
-- compare to expected label
-
-## Exercise Pipeline
-
-File: [pipelines/exercise_pipeline.py](pipelines/exercise_pipeline.py)
-
-### Goal
-
-Train a pose-based classifier for exercise recognition using MediaPipe Pose landmarks.
-
-### Data source
-
-The script reads from:
-
-```text
-.context/dataset/EXERCISE_DATASET/DATASET
-```
-
-Each class should be stored in its own folder.
-
-### Preprocessing steps
-
-1. Load each image in the class folders.
-2. Run MediaPipe Pose Landmarker.
-3. Extract up to 33 body landmarks.
-4. Normalize landmarks by torso scale.
-5. Convert each pose into a 99-value feature vector.
-
-The normalization centers the pose around the mid-hip point and scales it by torso length so the model is less sensitive to camera distance.
-
-### Training steps
-
-1. Split the extracted vectors into train and validation sets.
-2. Build a dense classifier.
-3. Train with:
-   - EarlyStopping
-   - ModelCheckpoint
-   - ReduceLROnPlateau
-4. Save the best model as `ExerciseClassifier_best.keras`.
-
-### Export steps
-
-1. Load the best `.keras` model.
-2. Convert it to TensorFlow Lite.
-3. Save the TFLite model to:
-
-```text
-assets/models/exercise_classifier.tflite
-```
-
-4. Save class labels to:
-
-```text
-assets/models/exercise_classifier_labels.txt
-```
-
-### What the model does in the app
-
-The exercise analyzer uses the pose landmarks live from the camera, counts reps, scores posture quality, and displays exercise-specific feedback.
-
-## Posture Pipeline
-
-File: [pipelines/posture_pipeline.py](pipelines/posture_pipeline.py)
-
-### Goal
-
-Train a lightweight posture classifier that detects whether the user is upright or slouched.
-
-### Data source
-
-The script reads label files from:
-
-```text
-.context/dataset/POSTURE_DATASET/labels
-```
-
-Each `.txt` label file is parsed from YOLO-style keypoint data.
-
-### Preprocessing steps
-
-1. Parse each label file.
-2. Extract shoulder and hip keypoints.
-3. Compute torso tilt and shoulder tilt.
-4. Convert those geometry signals into a 12-value feature vector.
-5. Generate a binary label:
-   - 1 = upright
-   - 0 = slouched
-
-This pipeline does not train on images; it trains on extracted geometry features.
-
-### Training steps
-
-1. Load the feature vectors.
-2. Split into train and validation sets.
-3. Train a compact dense classifier.
-4. Save the best model as `PostureClassifier_best.keras`.
-
-### Export steps
-
-1. Convert the best model to TFLite.
-2. Save to:
-
-```text
-assets/models/posture_classifier.tflite
-```
-
-3. Save labels to:
-
-```text
-assets/models/posture_classifier_labels.txt
-```
-
-### What the model does in the app
-
-The posture logic provides upright/slouched feedback during exercise sessions and can be used to warn the user when form drifts.
-
-## Yoga Pipeline
-
-File: [yoga_pipeline.py](yoga_pipeline.py)
-
-### Goal
-
-Train a yoga pose classifier using skeletonized MediaPipe pose data and export it for Flutter / TFLite inference.
-
-### Data source
-
-The yoga training script expects image folders under:
-
-```text
-.context/dataset/DATASET/TRAIN
-.context/dataset/DATASET/TEST
-```
-
-### Training approach
-
-The yoga pipeline uses a two-stage design.
-
-#### Stage 1: Skeletonization
-
-1. Load raw yoga images.
-2. Run MediaPipe Pose on each image.
-3. Draw only the skeleton / keypoints on a black canvas.
-4. Save skeletonized images into a mirrored output structure.
-
-This removes background noise, clothing, and lighting variation so the classifier focuses on body geometry.
-
-#### Stage 2: Landmark extraction and classification
-
-1. Use a pose landmarker model.
-2. Extract 33 landmarks.
-3. Convert landmarks to a 99-value feature vector.
-4. Train a dense landmark classifier on those vectors.
-
-### Training steps
-
-1. Read classes from the training folder.
-2. Extract landmarks from training and test images.
-3. Split the training set into train and validation subsets.
-4. Train the `YogaLandmarkClassifier` with callback support.
-5. Evaluate on the test set.
-
-### Export steps
-
-1. Save the best Keras checkpoint as `YogaConvo2d_best.keras`.
-2. Convert to TFLite.
-3. Save the TFLite model to:
-
-```text
-assets/models/yoga_classifier.tflite
-```
-
-4. Save labels to:
-
-```text
-assets/models/yoga_classifier_labels.txt
-```
-
-### What the model does in the app
-
-The yoga mode uses pose detection to estimate the current pose, show accuracy, and provide hold-time and stability feedback.
-
-## Current Model Assets
-
-The repo already includes trained model artifacts:
-
-- `ExerciseClassifier_best.keras`
-- `PostureClassifier_best.keras`
-- `YogaConvo2d_best.keras`
-
-These can be converted to TFLite or reused for experimentation.
-
-## Running The Pipelines
-
-### Exercise pipeline
+| | |
+|---|---|
+| Script | `pipelines/exercise_pipeline.py` |
+| Data source | `.context/dataset/EXERCISE_DATASET/DATASET` (one folder per class) |
+| Preprocessing | Extract up to 33 landmarks per image → normalize by torso scale (centered on mid-hip) → 99-value feature vector |
+| Training | Dense classifier, `EarlyStopping` + `ModelCheckpoint` + `ReduceLROnPlateau` |
+| Output | `ExerciseClassifier_best.keras` → `assets/models/exercise_classifier.tflite` + labels |
 
 ```powershell
 python pipelines/exercise_pipeline.py
 ```
 
-### Posture pipeline
+### 2. Posture Pipeline
+**Goal:** binary upright/slouched classifier from body geometry (not raw images).
+
+| | |
+|---|---|
+| Script | `pipelines/posture_pipeline.py` |
+| Data source | YOLO-style keypoint labels in `.context/dataset/POSTURE_DATASET/labels` |
+| Preprocessing | Extract shoulder/hip keypoints → compute torso and shoulder tilt → 12-value feature vector → binary label (1 = upright, 0 = slouched) |
+| Training | Compact dense classifier |
+| Output | `PostureClassifier_best.keras` → `assets/models/posture_classifier.tflite` + labels |
 
 ```powershell
 python pipelines/posture_pipeline.py
 ```
 
-### Yoga pipeline
+### 3. Yoga Pipeline
+**Goal:** classify yoga poses using a two-stage skeleton + landmark approach.
+
+| | |
+|---|---|
+| Script | `yoga_pipeline.py` |
+| Data source | `.context/dataset/DATASET/TRAIN` and `.../TEST` |
+| Stage 1 — Skeletonization | MediaPipe pose → draw skeleton-only on black canvas (strips background, clothing, lighting noise) |
+| Stage 2 — Classification | Extract 33 landmarks → 99-value feature vector → train `YogaLandmarkClassifier` |
+| Output | `YogaConvo2d_best.keras` → `assets/models/yoga_classifier.tflite` + labels |
 
 ```powershell
 python yoga_pipeline.py
 ```
 
-### Useful environment variables
+### Environment variables
 
-- `EXERCISE_EPOCHS` - overrides exercise training epochs
-- `POSTURE_EPOCHS` - overrides posture training epochs
-- `YOGA_EPOCHS` - overrides yoga training epochs
-- `YOGA_PLOT_RESULTS` - set to `1` to show curves and confusion matrix
-
-Example:
+| Variable | Purpose |
+|---|---|
+| `EXERCISE_EPOCHS` | Override exercise training epochs |
+| `POSTURE_EPOCHS` | Override posture training epochs |
+| `YOGA_EPOCHS` | Override yoga training epochs |
+| `YOGA_PLOT_RESULTS` | Set to `1` to plot training curves + confusion matrix |
 
 ```powershell
 $env:YOGA_EPOCHS = '10'
@@ -459,109 +236,91 @@ $env:YOGA_PLOT_RESULTS = '1'
 python yoga_pipeline.py
 ```
 
-## How The App Uses The Models
+<a name="notebook-workflow"></a>
+<details>
+<summary><b>📓 Notebook-friendly cell breakdown</b></summary>
 
-1. The camera captures live frames.
-2. MediaPipe Pose extracts landmarks.
-3. The feature vector is built and normalized.
-4. The model predicts exercise, posture, or yoga state.
-5. The UI shows counters, scores, and feedback.
+Each pipeline follows the same stage order, so it's easy to split into `.ipynb` cells if you prefer interactive experimentation:
 
-## Testing Strategy
+1. **Imports & setup** — numpy, pandas, cv2, mediapipe, tensorflow, sklearn; define data/output paths
+2. **Dataset exploration** — count classes, inspect samples, verify directory structure
+3. **Preprocessing** — MediaPipe pose detection, landmark normalization, skeletonization, train/val/test split
+4. **Feature engineering** — landmarks → numeric feature vectors, posture geometry features, class labels
+5. **Model definition** — Keras architecture (dense or CNN), Adam optimizer, sparse categorical cross-entropy
+6. **Training** — `model.fit()` with `EarlyStopping`, `ModelCheckpoint`, `ReduceLROnPlateau`
+7. **Evaluation** — validation/test metrics, confusion matrix, training curves
+8. **Export** — save best Keras checkpoint → convert to TFLite → write labels file
+9. **Inference test** — run one sample through the exported model to sanity-check predictions
 
-### ML training testing
+</details>
 
-For each pipeline, verify:
+---
 
-1. Dataset path exists.
-2. Landmark extraction succeeds.
-3. Training loss decreases.
-4. Validation accuracy is stable.
-5. Confusion matrix matches expected classes.
-6. TFLite export succeeds.
-7. Labels file matches model outputs.
+## ✅ Testing Checklist
 
-### App testing
+<details>
+<summary><b>ML pipeline validation</b></summary>
 
-Use these checks:
+- [ ] Dataset path exists and is populated
+- [ ] Landmark extraction succeeds on sample data
+- [ ] Training loss decreases across epochs
+- [ ] Validation accuracy is stable (not overfitting)
+- [ ] Confusion matrix matches expected class set
+- [ ] TFLite export completes without error
+- [ ] Labels file order matches model output indices
 
-1. App launches.
-2. Firebase auth signs in successfully.
-3. Camera permissions are granted.
-4. Exercise mode counts reps correctly.
-5. Yoga mode detects pose and accuracy.
-6. Posture feedback shows upright/slouched state.
-7. AI assistant responds with contextual answers.
+</details>
 
-## Notebook-to-Script Mapping
+<details>
+<summary><b>App smoke tests</b></summary>
 
-If you are coming from Jupyter notebooks, here is the mental mapping:
+- [ ] App launches without crash
+- [ ] Firebase Auth sign-in succeeds
+- [ ] Camera permission is requested and granted
+- [ ] Exercise mode counts reps correctly
+- [ ] Yoga mode detects pose + reports accuracy
+- [ ] Posture feedback correctly shows upright/slouched
+- [ ] AI assistant returns a contextual response
 
-- Notebook imports cell -> script import section
-- Dataset inspection cell -> `load_dataset` / `extract_dataset`
-- Preprocessing cell -> MediaPipe + normalization helpers
-- Model cell -> `build_model()` / `build_landmark_classifier()`
-- Training cell -> `model.fit()` with callbacks
-- Evaluation cell -> `model.evaluate()` and plots
-- Export cell -> `export_tflite()`
+</details>
 
-That is why these scripts are notebook-friendly: you can split them into cells in VS Code if you prefer interactive experimentation.
+---
 
-## Deployment Notes
+## 🩺 Troubleshooting
 
-If you need the backend configured:
+| Symptom | Fix |
+|---|---|
+| Flutter build fails | `flutter clean && flutter pub get && flutter analyze` |
+| Model files missing at runtime | Confirm files exist under `assets/models/` and are declared in `pubspec.yaml` |
+| Pipeline can't find dataset | Place data under `.context/dataset/` matching the expected structure per pipeline |
+| MediaPipe pose model won't download | Pipelines auto-download the landmarker on first run — ensure network access |
+| Assistant can't answer weekly questions | Confirm the user is signed in and `users/{uid}` + recent `sessions` docs exist in Firestore |
 
-- [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
-- [GEMINI_API_DEPLOYMENT.md](GEMINI_API_DEPLOYMENT.md)
-- [START_HERE.md](START_HERE.md)
+---
 
-## Troubleshooting
+## 🗺 Roadmap
 
-### Flutter build issues
+- [ ] Checked-in `.ipynb` notebooks alongside the pipeline scripts
+- [ ] Expanded exercise class coverage
+- [ ] Session history charts in-app
+- [ ] Wearable integration for heart-rate-aware coaching
 
-Run:
-
-```powershell
-flutter clean
-flutter pub get
-flutter analyze
-```
-
-### Missing model files
-
-Verify the files exist under `assets/models/` and that `pubspec.yaml` includes the assets path.
-
-### Missing dataset
-
-The pipeline scripts expect local data under `.context/dataset/`. If you are training from scratch, download or place the datasets in the expected folder structure.
-
-### MediaPipe pose model download fails
-
-The yoga and exercise pipelines auto-download a pose landmarker file. Make sure the machine has network access the first time you run them.
-
-### AI says it cannot answer weekly questions
-
-Make sure the user is signed in and Firestore contains `users/{uid}` and recent `sessions` documents.
-
-## Contributing
+## 🤝 Contributing
 
 When adding a new ML pipeline or notebook:
 
-1. Put source in `pipelines/` or a dedicated module.
-2. Document the preprocessing steps.
-3. Save best checkpoint and TFLite export paths.
-4. Add a short usage section to this README.
-5. Keep outputs under `assets/models/`.
+1. Put source in `pipelines/` or a dedicated module
+2. Document the preprocessing steps in this README
+3. Save the best checkpoint and TFLite export paths under `assets/models/`
+4. Add a short usage section here
+5. Keep exported models under `assets/models/`
 
-## Summary
+## 📄 License
 
-Harmonia AI is a full-stack Flutter wellness app with:
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
 
-- Firebase authentication and storage
-- Firestore-backed user/session history
-- Cloud Functions AI responses
-- Firebase AI fallback support
-- Exercise, posture, and yoga ML pipelines
-- Notebook-friendly preprocessing and training workflow
+---
 
-If you want, I can also generate separate notebook-style `.ipynb` files for the exercise, posture, and yoga pipelines next.
+<div align="center">
+<sub>Built with Flutter, Firebase, MediaPipe, and TensorFlow Lite</sub>
+</div>
