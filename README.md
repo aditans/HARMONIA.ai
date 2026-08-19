@@ -19,9 +19,15 @@ Harmonia AI turns your phone's camera into a real-time fitness and posture coach
 This repo contains **both** the Flutter mobile app and the Python ML pipelines used to train the models it ships with.
 
 <p align="center">
-  <img src="docs/screenshots/hero.png" alt="Harmonia AI app screens" width="800">
-  <br>
-  <sub><i>Add your own screenshots/GIFs here — a 3–4 image row of Exercise, Yoga, Focus, and Assistant modes converts browsers into stars ⭐</i></sub>
+  <img src="docs/screenshots/dashboard.png" width="140">
+  <img src="docs/screenshots/exercise_mode.png" width="140">
+  <img src="docs/screenshots/yoga_mode.png" width="140">
+  <img src="docs/screenshots/focus_mode.png" width="140">
+  <img src="docs/screenshots/ai_assistant.png" width="140">
+  <img src="docs/screenshots/map.jpeg" width="140">
+</p>
+<p align="center">
+  <sub><i>Dashboard · Exercise Mode · Yoga Mode · Focus Mode · AI Assistant · Map</i></sub>
 </p>
 
 ---
